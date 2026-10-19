@@ -1,26 +1,21 @@
-// swift-tools-version: 6.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.0
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
     name: "LayerPreview",
     platforms: [.macOS(.v13), .iOS(.v16), .watchOS(.v9)],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "LayerPreview",
-            targets: ["LayerPreview"]
-        ),
+        .library(name: "LayerPreview", targets: ["LayerPreview"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0-latest"),
+        // A range across swift-syntax majors keeps the package resolvable next
+        // to other macro packages; swift-syntax bumps its major every Swift release.
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"700.0.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        // Macro implementation that performs the source transformation of a macro.
+        // Compiler plugin that rewrites the view tree at compile time.
         .macro(
             name: "LayerPreviewMacros",
             dependencies: [
@@ -28,20 +23,26 @@ let package = Package(
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftDiagnostics", package: "swift-syntax")
+                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
             ]
         ),
 
-        // Library that exposes a macro as part of its API, which is used in client programs.
+        // Public macro declarations plus the SwiftUI runtime that measures
+        // and draws the annotations.
         .target(name: "LayerPreview", dependencies: ["LayerPreviewMacros"]),
 
-        // A test target used to develop the macro implementation.
         .testTarget(
-            name: "LayerPreviewTests",
+            name: "LayerPreviewMacrosTests",
             dependencies: [
                 "LayerPreviewMacros",
-                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
             ]
+        ),
+        .testTarget(
+            name: "LayerPreviewTests",
+            dependencies: ["LayerPreview"]
         ),
     ],
     swiftLanguageModes: [.v6]
