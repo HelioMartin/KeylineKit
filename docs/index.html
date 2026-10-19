@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KeylineKit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="KeylineKit draws measured padding, spacing, sizes, corner radii and safe areas over your SwiftUI previews.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 112'%3E%3Crect x='2.5' y='2.5' width='107' height='107' rx='26' fill='%23FFD6A7' stroke='%231447E6' stroke-width='5'/%3E%3Crect x='27.75' y='27.75' width='56.5' height='56.5' rx='8' fill='white' stroke='%23008236' stroke-width='3.5'/%3E%3Cpath d='M56 7v17M49 7h14M49 24h14M7 56h17M7 49v14M24 49v14' stroke='%23CA3500' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<style>
+/* Layout: a spec sheet. The hero is annotated with live, measured keylines on
+   a point grid; the sections below stay quiet on an 8 pt rhythm. */
+:root {
+  --paper: #F6F7F9;
+  --surface: #FFFFFF;
+  --ink: #0F172B;
+  --muted: #4B5A70;
+  --hairline: #DCE2EA;
+  --grid-dot: #D5DCE5;
+  --link: #1447E6;
+  --k-blue: #1447E6;
+  --k-orange: #CA3500;
+  --k-orange-fill: rgba(255, 214, 167, 0.6);
+  --k-green: #008236;
+  --k-purple: #8200DB;
+  --k-purple-fill: rgba(233, 212, 255, 0.75);
+  --k-pink: #C6005C;
+  --k-slate: #314158;
+  --k-label: #FFFFFF;
+  --phone-bezel: #1D1D1F;
+  --code-bg: #FFFFFF;
+  --code-plain: #262626;
+  --code-keyword: #9B2393;
+  --code-decl: #0F68A0;
+  --code-type: #3900A0;
+  --code-string: #C41A16;
+  --code-number: #1C00CF;
+  --code-macro: #643820;
+  --code-comment: #5D6C79;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0B0F17;
+    --surface: #121927;
+    --ink: #E7ECF3;
+    --muted: #9AA7BA;
+    --hairline: #243047;
+    --grid-dot: #1E2839;
+    --link: #8DADFF;
+    --k-orange-fill: rgba(202, 53, 0, 0.32);
+    --k-purple-fill: rgba(130, 0, 219, 0.32);
+    --k-slate: #CBD5E1;
+    --phone-bezel: #3A3A3E;
+    --code-bg: #1F1F24;
+    --code-plain: #DFDFE0;
+    --code-keyword: #FC5FA3;
+    --code-decl: #5DD8FF;
+    --code-type: #D0A8FF;
+    --code-string: #FC6A5D;
+    --code-number: #D0BF69;
+    --code-macro: #FD8F3F;
+    --code-comment: #6C7986;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0B0F17;
+  --surface: #121927;
+  --ink: #E7ECF3;
+  --muted: #9AA7BA;
+  --hairline: #243047;
+  --grid-dot: #1E2839;
+  --link: #8DADFF;
+  --k-orange-fill: rgba(202, 53, 0, 0.32);
+  --k-purple-fill: rgba(130, 0, 219, 0.32);
+  --k-slate: #CBD5E1;
+  --phone-bezel: #3A3A3E;
+  --code-bg: #1F1F24;
+  --code-plain: #DFDFE0;
+  --code-keyword: #FC5FA3;
+  --code-decl: #5DD8FF;
+  --code-type: #D0A8FF;
+  --code-string: #FC6A5D;
+  --code-number: #D0BF69;
+  --code-macro: #FD8F3F;
+  --code-comment: #6C7986;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--link); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible + .switch-track {
+  outline: 2px solid var(--k-blue);
+  outline-offset: 3px;
+}
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 112%; text-wrap: balance; margin: 0; line-height: 1.08; }
+h2 { font-size: clamp(1.9rem, 3.6vw, 2.6rem); font-weight: 750; letter-spacing: -0.02em; }
+h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+p { margin: 0; }
+code, pre { font-family: var(--font-mono); }
+:not(pre) > code {
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Top bar */
+.topbar { padding-block: 20px; }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--ink); text-decoration: none;
+  font: 750 1.2rem/1 var(--font-display); font-stretch: 112%; letter-spacing: -0.01em;
+}
+.brand svg { width: 30px; height: 30px; flex: none; }
+.nav { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.95rem; }
+.nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
+.nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero {
+  padding-block: 32px 88px;
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 56px;
+  align-items: start;
+}
+.stage { position: relative; padding-block: 36px 8px; }
+.hero-copy { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 800; letter-spacing: -0.03em; }
+.lede { font-size: 1.2rem; color: var(--muted); max-width: 34em; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; align-self: flex-start; }
+.button {
+  display: inline-flex; align-items: center;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font: 600 1rem/1.2 var(--font-body);
+  text-decoration: none;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+}
+.button.primary { background: var(--k-blue); border-color: var(--k-blue); color: #FFFFFF; }
+.button:hover { filter: brightness(1.06); }
+
+.code {
+  margin: 0;
+  padding: 20px 24px;
+  border-radius: 12px;
+  background: var(--code-bg);
+  border: 1px solid var(--hairline);
+  color: var(--code-plain);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  min-width: 0;
+}
+.hero-code { align-self: flex-start; max-width: 100%; }
+.kw { color: var(--code-keyword); font-weight: 700; }
+.decl { color: var(--code-decl); }
+.type { color: var(--code-type); }
+.str { color: var(--code-string); }
+.num { color: var(--code-number); }
+.mac { color: var(--code-macro); }
+.com { color: var(--code-comment); font-style: italic; }
+
+.switch { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; font-size: 0.95rem; color: var(--muted); cursor: pointer; user-select: none; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch-track { width: 40px; height: 24px; border-radius: 12px; background: var(--hairline); position: relative; transition: background 0.15s; flex: none; }
+.switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); transition: transform 0.15s; }
+.switch input:checked + .switch-track { background: var(--k-blue); }
+.switch input:checked + .switch-track::after { transform: translateX(16px); }
+
+/* Live keylines drawn over the hero */
+.kl-layer { position: absolute; inset: 0; pointer-events: none; }
+.kl-layer > * { position: absolute; }
+.kl-outline { border: 1px solid var(--k-blue); }
+.kl-band { background: var(--k-orange-fill); }
+.kl-content { border: 1px solid var(--k-green); }
+.kl-gap { background: var(--k-purple-fill); }
+.kl-ruler-v { border-left: 1px solid var(--k-orange); }
+.kl-ruler-v::before, .kl-ruler-v::after { content: ""; position: absolute; left: -5px; width: 9px; border-top: 1px solid var(--k-orange); }
+.kl-ruler-v::before { top: 0; }
+.kl-ruler-v::after { bottom: 0; }
+.kl-badge {
+  font: 600 11px/16px var(--font-mono);
+  padding: 0 4px;
+  border-radius: 3px;
+  color: var(--k-label);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.kl-blue { background: var(--k-blue); }
+.kl-orange { background: var(--k-orange); }
+.kl-purple { background: var(--k-purple); }
+.kl-pink { background: var(--k-pink); }
+
+/* Screenshots */
+.showcase { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 18px; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tab {
+  font: 500 0.88rem/1 var(--font-body);
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.phone {
+  width: min(320px, 100%);
+  border: 10px solid var(--phone-bezel);
+  border-radius: 50px;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 24px 48px -24px rgba(15, 23, 43, 0.35);
+}
+.phone img { width: 100%; height: auto; }
+.showcase figcaption { font-size: 0.9rem; color: var(--muted); text-align: center; max-width: 30em; }
+
+/* Sections */
+.section { padding-block: 88px; border-bottom: 1px solid var(--hairline); }
+.section-head { display: flex; flex-direction: column; gap: 14px; max-width: 44em; margin-bottom: 40px; }
+.section-head p { color: var(--muted); font-size: 1.1rem; }
+
+.spec { width: 100%; border-collapse: collapse; font-size: 0.98rem; min-width: 560px; }
+.spec-scroll { overflow-x: auto; }
+.spec th { text-align: left; font: 600 0.78rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-block: 0 14px; }
+.spec td { padding-block: 16px; border-top: 1px solid var(--hairline); vertical-align: middle; }
+.spec td:first-child { padding-right: 24px; }
+.spec td:last-child { color: var(--muted); padding-left: 24px; }
+.spec .kl-badge { display: inline-block; font-size: 13px; line-height: 20px; padding: 0 6px; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 22px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  min-width: 0;
+}
+.card svg { width: 100%; height: auto; margin-bottom: 8px; }
+.card h3 code { font-size: 1rem; background: none; border: 0; padding: 0; }
+.card p { color: var(--muted); font-size: 0.98rem; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; counter-reset: step; }
+.steps li { display: flex; flex-direction: column; gap: 10px; min-width: 0; counter-increment: step; }
+.steps li::before {
+  content: counter(step);
+  font: 700 0.85rem/1 var(--font-mono);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--k-blue); color: var(--k-blue);
+}
+.steps p { color: var(--muted); }
+.expansion { margin-top: 32px; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.split > div { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.split p { color: var(--muted); }
+
+.install-steps { margin: 0; padding-left: 1.2em; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
+.url-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+.url-row code { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; padding: 10px 12px; font-size: 0.9rem; overflow-x: auto; white-space: nowrap; }
+.copy { font: 600 0.9rem/1 var(--font-body); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.chips li { font: 600 0.82rem/1 var(--font-mono); padding: 8px 10px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); }
+
+.footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.92rem; }
+.footer .wrap { display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 900px) {
+  .hero-grid, .split { grid-template-columns: minmax(0, 1fr); }
+  .cards, .steps { grid-template-columns: minmax(0, 1fr); }
+  .section { padding-block: 64px; }
+}
+@media (min-width: 901px) and (max-width: 1080px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch-track, .switch-track::after { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="KeylineKit home">
+      <svg viewBox="0 0 112 112" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="107" height="107" rx="26" fill="#FFD6A7" stroke="#1447E6" stroke-width="5"/>
+        <rect x="27.75" y="27.75" width="56.5" height="56.5" rx="8" fill="#FFFFFF" stroke="#008236" stroke-width="3.5"/>
+        <path d="M56 7v17M49 7h14M49 24h14M7 56h17M7 49v14M24 49v14" stroke="#CA3500" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      KeylineKit
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#annotations">Annotations</a>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/HelioMartin/KeylineKit">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="stage" data-keyline-stage>
+          <div class="hero-copy" data-kl-name="VStack" data-kl-spacing>
+            <h1 data-kl-name="Text">See the layout SwiftUI actually renders.</h1>
+            <p class="lede">KeylineKit draws your preview's layers, padding, spacing, sizes, corner radii and safe area right on the Xcode Canvas, measured in points.</p>
+            <div class="actions" data-kl-name="HStack">
+              <a class="button primary" data-kl-name="Button" href="#install">Get started</a>
+              <a class="button" data-kl-name="Button" href="https://github.com/HelioMartin/KeylineKit">View on GitHub</a>
+            </div>
+            <pre class="code hero-code" data-kl-name="Code" data-kl-padding><code><span class="mac">#Preview</span> {
+    <span class="mac">#Keyline</span> {
+        <span class="type">ProfileView</span>()
+    }
+}</code></pre>
+          </div>
+          <div class="kl-layer" aria-hidden="true"></div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="keylines-toggle" checked>
+          <span class="switch-track" aria-hidden="true"></span>
+          Keylines on this page, measured live by your browser
+        </label>
+      </div>
+
+      <figure class="showcase">
+        <div class="tabs" role="tablist" aria-label="Example annotations">
+          <button class="tab" role="tab" aria-selected="true" aria-controls="shot" data-shot="default-light" data-alt="An account screen with every layer named, padding in orange and stack spacing in purple" data-caption="#Keyline { AccountScreen() }: layer names, padding and spacing.">Layers &amp; padding</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="shot" data-shot="safe-area" data-alt="The account screen with the top and bottom safe-area insets in orange and the safe area outlined in green" data-caption="#Keyline(.safeArea, .layers): TOP 62 and BOTTOM 34 on iPhone 18 Pro.">Safe area</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="shot" data-shot="corners-sizes" data-alt="A profile card with width and height dimension lines and its 24 point corner radius" data-caption="#Keyline(.layers, .corners, .size): dimension lines and the card's corner radius.">Corners &amp; sizes</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="shot" data-shot="default-dark" data-alt="The account screen in dark mode with layer names, padding and spacing" data-caption="The same annotations in dark mode.">Dark mode</button>
+        </div>
+        <div class="phone">
+          <img id="shot" src="images/default-light.png" width="603" height="1311" alt="An account screen with every layer named, padding in orange and stack spacing in purple">
+        </div>
+        <figcaption id="shot-caption"><code>#Keyline { AccountScreen() }</code>: layer names, padding and spacing.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="measured">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Measured, not guessed</h2>
+        <p>Every value comes from the rendered layout. When your code says something less precise than a number, KeylineKit shows both, so you learn what <code>default</code> really means.</p>
+      </div>
+      <div class="spec-scroll">
+        <table class="spec">
+          <thead>
+            <tr><th scope="col">In your code</th><th scope="col">On the Canvas</th><th scope="col">Why</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>.padding(24)</code></td><td><span class="kl-badge kl-orange">24</span></td><td>The measured value matches the source.</td></tr>
+            <tr><td><code>.padding()</code></td><td><span class="kl-badge kl-orange">16 · default</span></td><td>SwiftUI picked 16; the source said default.</td></tr>
+            <tr><td><code>VStack(spacing: Theme.spacing)</code></td><td><span class="kl-badge kl-purple">12 · Theme.spacing</span></td><td>The gap is measured; the constant is named.</td></tr>
+            <tr><td><code>.background(.blue, in: RoundedRectangle(cornerRadius: 24))</code></td><td><span class="kl-badge kl-pink">r 24</span></td><td>Corner radii are read where they're applied.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="annotations">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Pick what to draw</h2>
+        <p>With no arguments, <code>#Keyline</code> draws layers, padding and spacing. Pass the annotations you want, in any combination.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="30" y="34" width="140" height="56" fill="none" stroke="var(--k-blue)" stroke-width="1.5"/>
+            <rect x="30" y="14" width="40" height="17" rx="3" fill="var(--k-blue)"/>
+            <text x="50" y="26.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#FFFFFF">Text</text>
+            <rect x="44" y="52" width="80" height="8" rx="4" fill="var(--hairline)"/>
+            <rect x="44" y="66" width="104" height="8" rx="4" fill="var(--hairline)"/>
+          </svg>
+          <h3><code>.layers</code></h3>
+          <p>Each layer's type next to its bounds, nested containers included.</p>
+        </article>
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="30" y="10" width="140" height="90" fill="var(--k-orange-fill)"/>
+            <rect x="54" y="34" width="92" height="42" fill="var(--surface)" stroke="var(--k-green)" stroke-width="1.5"/>
+            <path d="M100 11v22M95 11h10M95 33h10" stroke="var(--k-orange)" stroke-width="1.5"/>
+            <rect x="107" y="14" width="22" height="16" rx="3" fill="var(--k-orange)"/>
+            <text x="118" y="26" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#FFFFFF">24</text>
+          </svg>
+          <h3><code>.padding</code></h3>
+          <p>A band for every <code>.padding(...)</code> call, a value per edge and the content outline.</p>
+        </article>
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="40" y="12" width="120" height="32" fill="none" stroke="var(--k-blue)" stroke-width="1.5"/>
+            <rect x="40" y="44" width="120" height="22" fill="var(--k-purple-fill)"/>
+            <rect x="40" y="66" width="120" height="32" fill="none" stroke="var(--k-blue)" stroke-width="1.5"/>
+            <rect x="89" y="47" width="22" height="16" rx="3" fill="var(--k-purple)"/>
+            <text x="100" y="59" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#FFFFFF">16</text>
+          </svg>
+          <h3><code>.spacing</code></h3>
+          <p>The measured gap between siblings of a <code>VStack</code> or <code>HStack</code>.</p>
+        </article>
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="40" y="40" width="120" height="56" fill="none" stroke="var(--k-blue)" stroke-width="1.5"/>
+            <path d="M40 40V22M160 40V22" stroke="var(--k-slate)" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>
+            <path d="M40 26h120M40 21.5v9M160 21.5v9" stroke="var(--k-slate)" stroke-width="1.2"/>
+            <rect x="85" y="18" width="30" height="16" rx="3" fill="var(--k-slate)"/>
+            <text x="100" y="30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="var(--surface)">120</text>
+          </svg>
+          <h3><code>.size</code></h3>
+          <p>Width and height dimension lines with dashed extension lines.</p>
+        </article>
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="40" y="16" width="120" height="80" rx="24" fill="none" stroke="var(--hairline)" stroke-width="1.5"/>
+            <path d="M40 40a24 24 0 0 1 24-24" fill="none" stroke="var(--k-pink)" stroke-width="2"/>
+            <path d="M40 40h24V16" fill="none" stroke="var(--k-pink)" stroke-width="1" stroke-dasharray="2 3" opacity="0.8"/>
+            <rect x="68" y="32" width="36" height="16" rx="3" fill="var(--k-pink)"/>
+            <text x="86" y="44" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#FFFFFF">r 24</text>
+          </svg>
+          <h3><code>.corners</code></h3>
+          <p>The arc and value of <code>cornerRadius:</code> and <code>.cornerRadius(_:)</code>.</p>
+        </article>
+        <article class="card">
+          <svg viewBox="0 0 200 110" aria-hidden="true">
+            <rect x="62" y="4" width="76" height="102" rx="14" fill="var(--k-orange-fill)"/>
+            <rect x="62" y="20" width="76" height="76" fill="var(--surface)" stroke="var(--k-green)" stroke-width="1.5"/>
+            <rect x="88" y="8" width="24" height="8" rx="4" fill="var(--ink)"/>
+            <rect x="76" y="50" width="48" height="16" rx="3" fill="var(--k-green)"/>
+            <text x="100" y="62" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#FFFFFF">SAFE AREA</text>
+          </svg>
+          <h3><code>.safeArea</code></h3>
+          <p>Device insets, the safe area and, on iOS 27.1, the reserved regions that cover content.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>One macro, three steps</h2>
+        <p>Nothing runs in your app until a preview renders <code>#Keyline</code>.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>The macro instruments your views</h3>
+          <p>At compile time, each view in the closure is wrapped in a node, with probes before and after every <code>.padding(...)</code> call.</p>
+        </li>
+        <li>
+          <h3>Every frame is measured</h3>
+          <p>At runtime, nodes and probes report their frames with <code>onGeometryChange</code>, also inside <code>NavigationStack</code> and <code>ScrollView</code>.</p>
+        </li>
+        <li>
+          <h3>One canvas draws it all</h3>
+          <p>A layout step turns frames into bands, gaps and dimension lines, places labels so they never overlap, and a single <code>Canvas</code> draws them.</p>
+        </li>
+      </ol>
+      <pre class="code expansion"><code><span class="com">// What #Keyline turns VStack { ProfileView() }.padding(24) into</span>
+<span class="type">_KeylineNode</span>(<span class="type">VStack</span> {
+    <span class="type">_KeylineNode</span>(<span class="type">ProfileView</span>(), <span class="type">_KeylineDeclaration</span>(<span class="str">"ProfileView"</span>))
+}
+.<span class="decl">_keylineProbe</span>(.<span class="decl">paddingInner</span>(<span class="num">0</span>))
+.<span class="decl">padding</span>(<span class="num">24</span>)
+.<span class="decl">_keylineProbe</span>(.<span class="decl">paddingOuter</span>(<span class="num">0</span>, declared: <span class="str">"24"</span>)), <span class="type">_KeylineDeclaration</span>(<span class="str">"VStack"</span>, stack: .<span class="decl">vertical</span>, spacing: <span class="str">"default"</span>))</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="custom-views">
+    <div class="wrap split">
+      <div>
+        <h2>Look inside your own views</h2>
+        <p><code>#Keyline</code> sees the code inside its own closure, so a custom view shows up as a single layer. Add <code>@Keylined</code> to the type and the overlay also draws what its <code>body</code> declares.</p>
+        <p>When a view and the root of its body share a frame, they share a label: <code>ProfileView › VStack</code>.</p>
+      </div>
+      <pre class="code"><code><span class="mac">@Keylined</span>
+<span class="kw">struct</span> <span class="decl">ProfileView</span>: <span class="type">View</span> {
+    <span class="kw">var</span> <span class="decl">body</span>: <span class="kw">some</span> <span class="type">View</span> {
+        <span class="type">VStack</span>(alignment: .<span class="decl">leading</span>, spacing: <span class="num">16</span>) {
+            <span class="type">Image</span>(systemName: <span class="str">"person.crop.circle.fill"</span>)
+            <span class="type">Text</span>(<span class="str">"Taylor Morgan"</span>)
+        }
+        .<span class="decl">padding</span>(<span class="num">24</span>)
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="wrap split">
+      <div>
+        <h2>Install</h2>
+        <ol class="install-steps">
+          <li>In Xcode, choose <strong>File › Add Package Dependencies…</strong></li>
+          <li>Paste the repository URL and add <code>KeylineKit</code> to your app target.</li>
+          <li>Import it and wrap a preview in <code>#Keyline</code>.</li>
+        </ol>
+        <div class="url-row">
+          <code id="repo-url">https://github.com/HelioMartin/KeylineKit.git</code>
+          <button class="copy" type="button" id="copy-url">Copy URL</button>
+        </div>
+        <ul class="chips" aria-label="Requirements">
+          <li>Xcode 16+</li>
+          <li>Swift 6</li>
+          <li>iOS 16+</li>
+          <li>macOS 13+</li>
+          <li>watchOS 9+</li>
+        </ul>
+      </div>
+      <pre class="code"><code><span class="com">// Package.swift</span>
+dependencies: [
+    .<span class="decl">package</span>(url: <span class="str">"https://github.com/HelioMartin/KeylineKit.git"</span>, branch: <span class="str">"main"</span>),
+],
+targets: [
+    .<span class="decl">target</span>(name: <span class="str">"MyApp"</span>, dependencies: [
+        .<span class="decl">product</span>(name: <span class="str">"KeylineKit"</span>, package: <span class="str">"KeylineKit"</span>),
+    ]),
+]</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>KeylineKit is available under the MIT license. Made by <a href="https://github.com/HelioMartin">Helio Martín</a>.</p>
+    <p>The palette, dimension lines and badges follow <a href="https://safearea.info">safearea.info</a> by <a href="https://github.com/stleamist">@stleamist</a>.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // Screenshot tabs.
+  const tabs = [...document.querySelectorAll('.tab')];
+  const shot = document.getElementById('shot');
+  const caption = document.getElementById('shot-caption');
+  function select(tab) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+    shot.src = 'images/' + tab.dataset.shot + '.png';
+    shot.alt = tab.dataset.alt;
+    const [code, ...rest] = tab.dataset.caption.split(': ');
+    caption.replaceChildren();
+    if (rest.length) {
+      const c = document.createElement('code');
+      c.textContent = code;
+      caption.append(c, ': ' + rest.join(': '));
+    } else {
+      caption.textContent = tab.dataset.caption;
+    }
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => select(tab)));
+  tabs.forEach((tab, i) => tab.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    next.focus();
+    select(next);
+  }));
+
+  // Copy the repository URL.
+  const copy = document.getElementById('copy-url');
+  const url = document.getElementById('repo-url');
+  copy.addEventListener('click', () => {
+    const done = () => { copy.textContent = 'Copied'; setTimeout(() => { copy.textContent = 'Copy URL'; }, 1600); };
+    const select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(url);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      copy.textContent = 'Press ⌘C';
+    };
+    try {
+      navigator.clipboard.writeText(url.textContent).then(done, select);
+    } catch (error) {
+      select();
+    }
+  });
+
+  // Live keylines: the hero measures itself the way #Keyline measures a preview.
+  const stage = document.querySelector('[data-keyline-stage]');
+  const layer = stage.querySelector('.kl-layer');
+  const toggle = document.getElementById('keylines-toggle');
+
+  const format = value => {
+    const rounded = Math.round(value * 100) / 100;
+    return String(rounded);
+  };
+
+  function draw() {
+    layer.replaceChildren();
+    if (!toggle.checked) return;
+
+    const origin = stage.getBoundingClientRect();
+    const frame = el => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
+    };
+    const placed = [];
+    const overlaps = r => placed.some(p => r.x < p.x + p.w + 1 && p.x < r.x + r.w + 1 && r.y < p.y + p.h + 1 && p.y < r.y + r.h + 1);
+    const box = (className, r) => {
+      const el = document.createElement('div');
+      el.className = className;
+      el.style.left = r.x + 'px';
+      el.style.top = r.y + 'px';
+      el.style.width = Math.max(r.w, 0) + 'px';
+      el.style.height = Math.max(r.h, 0) + 'px';
+      layer.append(el);
+      return el;
+    };
+    // Places a badge on the first free candidate center; returns false if none is free.
+    const badge = (text, color, centers, force) => {
+      const el = document.createElement('span');
+      el.className = 'kl-badge kl-' + color;
+      el.textContent = text;
+      layer.append(el);
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      const rects = centers.map(c => ({ x: c.x - w / 2, y: c.y - h / 2, w, h }));
+      let chosen = rects.find(r => !overlaps(r));
+      if (!chosen && force) chosen = rects[0];
+      if (!chosen) { el.remove(); return false; }
+      placed.push(chosen);
+      el.style.left = chosen.x + 'px';
+      el.style.top = chosen.y + 'px';
+      return true;
+    };
+
+    // Padding bands with a value on each padded edge.
+    stage.querySelectorAll('[data-kl-padding]').forEach(el => {
+      const r = frame(el);
+      const s = getComputedStyle(el);
+      const p = { t: parseFloat(s.paddingTop), r: parseFloat(s.paddingRight), b: parseFloat(s.paddingBottom), l: parseFloat(s.paddingLeft) };
+      const inner = { x: r.x + p.l, y: r.y + p.t, w: r.w - p.l - p.r, h: r.h - p.t - p.b };
+      box('kl-band', { x: r.x, y: r.y, w: r.w, h: p.t });
+      box('kl-band', { x: r.x, y: inner.y + inner.h, w: r.w, h: p.b });
+      box('kl-band', { x: r.x, y: inner.y, w: p.l, h: inner.h });
+      box('kl-band', { x: inner.x + inner.w, y: inner.y, w: p.r, h: inner.h });
+      box('kl-content', inner);
+      const cx = inner.x + inner.w * 0.7;
+      if (p.t >= 1) { box('kl-ruler-v', { x: cx - 18, y: r.y, w: 1, h: p.t }); badge(format(p.t), 'orange', [{ x: cx, y: r.y + p.t / 2 }], true); }
+      if (p.b >= 1) { box('kl-ruler-v', { x: cx - 18, y: inner.y + inner.h, w: 1, h: p.b }); badge(format(p.b), 'orange', [{ x: cx, y: inner.y + inner.h + p.b / 2 }], true); }
+      if (p.l >= 1) badge(format(p.l), 'orange', [{ x: r.x + p.l / 2, y: inner.y + inner.h / 2 }], true);
+      if (p.r >= 1) badge(format(p.r), 'orange', [{ x: inner.x + inner.w + p.r / 2, y: inner.y + inner.h / 2 }], true);
+    });
+
+    // Gaps between the children of a vertical stack.
+    stage.querySelectorAll('[data-kl-spacing]').forEach(el => {
+      const frames = [...el.children].map(frame).filter(r => r.h > 0).sort((a, b) => a.y - b.y);
+      for (let i = 0; i < frames.length - 1; i++) {
+        const a = frames[i], b = frames[i + 1];
+        const gap = b.y - (a.y + a.h);
+        if (gap < 1) continue;
+        const x = Math.min(a.x, b.x);
+        const w = Math.max(a.x + a.w, b.x + b.w) - x;
+        box('kl-gap', { x, y: a.y + a.h, w, h: gap });
+        badge(format(gap), 'purple', [{ x: x + w / 2, y: a.y + a.h + gap / 2 }, { x: x + w * 0.75, y: a.y + a.h + gap / 2 }], true);
+      }
+    });
+
+    // Layer outlines and names, placed last so values keep their spots.
+    stage.querySelectorAll('[data-kl-name]').forEach(el => {
+      const r = frame(el);
+      box('kl-outline', r);
+      const probe = document.createElement('span');
+      probe.className = 'kl-badge';
+      probe.textContent = el.dataset.klName;
+      layer.append(probe);
+      const w = probe.offsetWidth, h = probe.offsetHeight;
+      probe.remove();
+      badge(el.dataset.klName, 'blue', [
+        { x: r.x + w / 2, y: r.y - h / 2 - 2 },
+        { x: r.x + r.w - w / 2, y: r.y - h / 2 - 2 },
+        { x: r.x + w / 2 + 2, y: r.y + h / 2 + 2 },
+        { x: r.x + r.w - w / 2 - 2, y: r.y + h / 2 + 2 },
+      ], false);
+    });
+  }
+
+  toggle.addEventListener('change', draw);
+  new ResizeObserver(draw).observe(stage);
+  window.addEventListener('resize', draw);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  draw();
+})();
+</script>
+</body>
+</html>
