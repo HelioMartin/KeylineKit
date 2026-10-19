@@ -11,13 +11,14 @@ struct Palette {
     let markFill: Color
     let markInner: Color
     let spacingFill: Color
+    let border: Color
 
     static let light = Palette(background: .white, ink: Color(hex: 0x0F172B), slate: Color(hex: 0x62748E),
                                markFill: Color(hex: 0xFFD6A7), markInner: .white,
-                               spacingFill: Color(hex: 0xE9D4FF).opacity(0.7))
+                               spacingFill: Color(hex: 0xE9D4FF).opacity(0.7), border: Color(hex: 0xD1D9E0))
     static let dark = Palette(background: Color(hex: 0x0D1117), ink: Color(hex: 0xF0F6FC), slate: Color(hex: 0x9198A1),
                               markFill: Color(hex: 0xCA3500).opacity(0.45), markInner: Color(hex: 0x0D1117),
-                              spacingFill: Color(hex: 0x8200DB).opacity(0.45))
+                              spacingFill: Color(hex: 0x8200DB).opacity(0.45), border: Color(hex: 0x3D444D))
 }
 
 let blue = Color(hex: 0x1447E6)
@@ -114,23 +115,26 @@ struct Banner: View {
     }
 }
 
-/// The call to action under the README banner. Transparent around the
-/// button, so one image works on light and dark pages.
+/// The link to the website under the README banner: a small outlined pill
+/// in the page's own colors, one image per theme.
 struct WebsiteButton: View {
+    let palette: Palette
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 7) {
             Image(systemName: "safari")
-                .font(.system(size: 24, weight: .semibold))
-            Text("Visit the website")
-                .font(.system(size: 24, weight: .semibold))
-                .tracking(-0.2)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(palette.slate)
+            Text("Website")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(palette.ink)
             Image(systemName: "arrow.up.right")
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(palette.slate)
         }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 34)
-        .frame(height: 68)
-        .background(blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 14)
+        .frame(height: 30)
+        .background(palette.background, in: Capsule())
+        .overlay { Capsule().strokeBorder(palette.border, lineWidth: 1) }
         .fixedSize()
     }
 }
@@ -149,5 +153,6 @@ let output = URL(fileURLWithPath: CommandLine.arguments[1])
 try MainActor.assumeIsolated {
     try render(Banner(palette: .light), to: output.appendingPathComponent("keylinekit-banner-light.png"))
     try render(Banner(palette: .dark), to: output.appendingPathComponent("keylinekit-banner-dark.png"))
-    try render(WebsiteButton(), to: output.appendingPathComponent("keylinekit-website-button.png"))
+    try render(WebsiteButton(palette: .light), to: output.appendingPathComponent("keylinekit-website-light.png"))
+    try render(WebsiteButton(palette: .dark), to: output.appendingPathComponent("keylinekit-website-dark.png"))
 }

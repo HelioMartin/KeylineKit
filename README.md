@@ -4,7 +4,10 @@
 </picture>
 
 <p align="center">
-  <a href="https://heliomartin.github.io/KeylineKit/"><img src=".github/assets/keylinekit-website-button.png" width="316" alt="Visit the KeylineKit website"></a>
+  <a href="https://heliomartin.github.io/KeylineKit/"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/keylinekit-website-dark.png">
+    <img src=".github/assets/keylinekit-website-light.png" width="123" alt="KeylineKit website">
+  </picture></a>
 </p>
 
 <p align="center">
