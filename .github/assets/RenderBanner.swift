@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-// Renders the KeylineKit README banner (light and dark) to PNG.
+// Renders the KeylineKit README banner (light and dark) and the website button to PNG.
 // Usage: DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift .github/assets/RenderBanner.swift .github/assets
 
 struct Palette {
@@ -114,9 +114,30 @@ struct Banner: View {
     }
 }
 
+/// The call to action under the README banner. Transparent around the
+/// button, so one image works on light and dark pages.
+struct WebsiteButton: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "safari")
+                .font(.system(size: 24, weight: .semibold))
+            Text("Visit the website")
+                .font(.system(size: 24, weight: .semibold))
+                .tracking(-0.2)
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: 19, weight: .bold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 34)
+        .frame(height: 68)
+        .background(blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .fixedSize()
+    }
+}
+
 @MainActor
-func render(_ palette: Palette, to url: URL) throws {
-    let renderer = ImageRenderer(content: Banner(palette: palette))
+func render(_ view: some View, to url: URL) throws {
+    let renderer = ImageRenderer(content: view)
     renderer.scale = 2
     guard let image = renderer.cgImage else { throw CocoaError(.fileWriteUnknown) }
     let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
@@ -126,6 +147,7 @@ func render(_ palette: Palette, to url: URL) throws {
 
 let output = URL(fileURLWithPath: CommandLine.arguments[1])
 try MainActor.assumeIsolated {
-    try render(.light, to: output.appendingPathComponent("keylinekit-banner-light.png"))
-    try render(.dark, to: output.appendingPathComponent("keylinekit-banner-dark.png"))
+    try render(Banner(palette: .light), to: output.appendingPathComponent("keylinekit-banner-light.png"))
+    try render(Banner(palette: .dark), to: output.appendingPathComponent("keylinekit-banner-dark.png"))
+    try render(WebsiteButton(), to: output.appendingPathComponent("keylinekit-website-button.png"))
 }
