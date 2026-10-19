@@ -1,8 +1,8 @@
 import CoreGraphics
 import Foundation
 
-/// Formats measured points the way safearea.info does: up to two decimals,
-/// without trailing zeros (`24`, `36.67`).
+/// Formats measured points with up to two decimals and without trailing
+/// zeros (`24`, `36.67`).
 enum MetricFormat {
     static func points(_ value: CGFloat) -> String {
         let hundredths = (value * 100).rounded()

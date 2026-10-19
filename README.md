@@ -23,9 +23,6 @@ KeylineKit draws the answer on top of your preview. Wrap a view in
 between its siblings, **measured in points** from the rendered layout. It
 can also show sizes, corner radii and the device safe area.
 
-The visual language comes from [safearea.info](https://safearea.info): filled
-regions, dimension lines with end ticks and values in monospaced badges.
-
 <p align="center">
   <a href="#features">🌟 Features</a> ·
   <a href="#why-keylinekit">🤔 Why KeylineKit?</a> ·
@@ -287,11 +284,6 @@ swift test
 > 📣 If `xcode-select` points to the Command Line Tools, SwiftPM can't find
 > the SDK's SwiftUI macros (`@State`, `@Entry`). Use Xcode's toolchain:
 > `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test`.
-
-## 🙏 Acknowledgements
-
-The palette, dimension lines and badges follow
-[safearea.info](https://safearea.info) by [@stleamist](https://github.com/stleamist).
 
 ## 👨🏻‍💻 Author
 

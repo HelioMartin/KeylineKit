@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The palette of safearea.info (Tailwind 700 lines, 200 fills): blue for
+/// The annotation palette (Tailwind 700 lines, 200 fills): blue for
 /// layers, orange for insets, green for content, purple for spacing and
 /// reserved regions, pink for corners and slate for sizes.
 struct KeylineTheme {
