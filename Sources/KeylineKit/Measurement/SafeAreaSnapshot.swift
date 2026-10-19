@@ -4,7 +4,7 @@ import SwiftUI
 struct SafeAreaSnapshot: Equatable, Sendable {
     var safeFrame: CGRect
     var insets: EdgeInsets
-    /// Active reserved regions that occlude content, such as the Dynamic Island.
+    /// Active reserved regions that cover content, such as camera housings.
     var occlusions: [CGRect]
 
     var screenFrame: CGRect {

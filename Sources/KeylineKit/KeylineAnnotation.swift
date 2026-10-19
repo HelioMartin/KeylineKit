@@ -18,7 +18,7 @@ public enum KeylineAnnotation: CaseIterable, Hashable, Sendable {
     case size
     /// Draws the corner radius declared with `cornerRadius:` or `.cornerRadius(_:)`.
     case corners
-    /// Draws the device safe-area insets and reserved regions such as the Dynamic Island.
+    /// Draws the device safe-area insets and the reserved regions that cover content, such as camera housings.
     case safeArea
 
     static let defaults: Set<Self> = [.layers, .padding, .spacing]
