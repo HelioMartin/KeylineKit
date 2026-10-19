@@ -1,10 +1,11 @@
 # LayerPreview
 
-`#LayerPreview` muestra una vista SwiftUI junto con un inspector de capas. La
-macro analiza la closure con SwiftSyntax al compilar y conserva el preview de
-produccion sin modificaciones.
-
-Agrega este paquete como dependencia e importa el modulo en tu target de UI:
+`#LayerPreview` dibuja sobre una vista SwiftUI cómo está construido su layout:
+el nombre y los límites de cada capa, el padding y el spacing **medidos** en
+puntos, los tamaños, los radios de esquina y el área segura del dispositivo.
+El lenguaje visual está inspirado en [safearea.info](https://safearea.info):
+regiones rellenas, cotas con marcas en los extremos y valores en etiquetas
+monoespaciadas.
 
 ```swift
 import LayerPreview
@@ -12,7 +13,7 @@ import SwiftUI
 
 #Preview("Profile layers") {
     #LayerPreview {
-        VStack {
+        VStack(spacing: 16) {
             ProfileView()
         }
         .padding(24)
@@ -20,68 +21,51 @@ import SwiftUI
 }
 ```
 
-Por defecto, `#LayerPreview` muestra todas las anotaciones sin configuración adicional.
-Si se quieren filtrar, se puede pasar un array explícito:
+Requiere iOS 16, macOS 13 o watchOS 9. La macro analiza la closure con
+SwiftSyntax al compilar; el código de producción no cambia.
+
+## Anotaciones
+
+Sin argumentos se dibujan `.layers`, `.padding` y `.spacing`. Para elegir otras,
+pásalas como argumentos:
 
 ```swift
-#Preview("Profile padding") {
-    #LayerPreview(.layers, .padding) {
-        ProfileView()
-    }
-}
+#LayerPreview(.padding, .corners) { ProfileView() }
+#LayerPreview(.safeArea, .layers) { AccountScreen() }
+#LayerPreview(.layers, showContainerLines: false) { ProfileView() }
 ```
 
-Los valores posibles de `LayerPreviewAnnotation` son:
+| Anotación | Qué dibuja | Color |
+|---|---|---|
+| `.layers` | Nombre de cada capa junto a sus límites | Azul `#1447E6` |
+| `.padding` | Banda rellena de cada `.padding(...)`, con una cota por borde y el contorno del contenido en verde | Naranja `#CA3500` |
+| `.spacing` | Hueco entre hermanos de un `VStack`/`HStack` (y sus variantes `Lazy`) | Morado `#8200DB` |
+| `.size` | Cotas de ancho y alto de cada capa, con líneas de extensión discontinuas | Pizarra `#314158` |
+| `.corners` | Arco y radio de `cornerRadius:` o `.cornerRadius(_:)` | Rosa `#C6005C` |
+| `.safeArea` | Insets del dispositivo (`TOP 62`, `BOTTOM 34`), contorno `SAFE AREA` y, en iOS 27.1+, las regiones reservadas como la Dynamic Island | Naranja, verde y morado |
+| `.none` | Nada; los contornos dependen de `showContainerLines` | — |
 
-- `.none`: oculta todas las etiquetas.
-- `.layers`: muestra los recuadros y nombres de las capas.
-- `.padding`: muestra los valores de padding en los lados que afectan.
-- `.spacing`: muestra las separaciones entre los elementos de stacks.
+Los contornos azules de cada capa se dibujan por defecto. Para ocultarlos,
+usa `showContainerLines: false`.
 
-Los valores se pueden combinar pasándolos como argumentos separados, por ejemplo
-`.layers, .padding`.
+### Valor medido frente a valor declarado
 
-Las lineas amarillas que delimitan los contenedores estan activadas por defecto.
-Se pueden desactivar explicitamente:
+Las cifras se miden en tiempo de ejecución, así que muestran lo que SwiftUI
+aplica de verdad. Si el código no lo deja claro, el valor declarado aparece al
+lado:
 
-```swift
-#LayerPreview(.layers, showContainerLines: false) {
-    MyView()
-}
-```
+- `.padding(24)` → `24`
+- `.padding()` → `16 · default`
+- `VStack(spacing: Theme.spacing)` → `12 · Theme.spacing`
 
-El Canvas muestra cada nodo con su propio borde naranja y una etiqueta con su
-nombre en la esquina superior izquierda. El padding declarado ya no se muestra
-como texto combinado: aparece como una flecha con el valor, pegada al borde
-exacto que afecta:
+Las etiquetas se colocan juntas en una sola capa y nunca se solapan. Si un valor
+secundario (las cotas de `.size`) no cabe, se omite en vez de tapar a otro.
 
-- `↑ valor` sobre el borde superior (`.top` o `.vertical`).
-- `↓ valor` sobre el borde inferior (`.bottom` o `.vertical`).
-- `← valor` sobre el borde izquierdo (`.leading` o `.horizontal`).
-- `→ valor` sobre el borde derecho (`.trailing` o `.horizontal`).
+## Vistas propias: `@LayerPreviewInspectable`
 
-Por ejemplo, `.padding(24)` marca los cuatro bordes con `24`, mientras que
-`.padding(.horizontal, 16)` solo marca `←16` y `→16`. Si hay varias llamadas a
-`.padding(...)` encadenadas, la ultima que afecte a un borde es la que se
-muestra en ese borde.
-
-La instrumentación recorre la closure de cualquier inicializador con nombre
-capitalizado (`Grid`, `Form`, `ScrollView`, `NavigationStack`, una vista propia
-como `CustomCard`, etc.), sin necesidad de listar cada contenedor. Solo se
-excluye una lista breve de controles cuya closure final es una accion, no
-contenido (`Button`), para que `Button("Guardar") { guardar() }` nunca se
-reescriba por dentro.
-
-Ademas, entre cada par de elementos consecutivos dentro de un `VStack` o
-`HStack` (incluidas sus variantes `Lazy`) aparece una etiqueta morada con una
-flecha (`↕` o `↔`) y el valor de `spacing:` declarado, o `default` si no se
-especifico. Se dibuja centrada en el hueco que ocupa la separacion, junto al
-borde del elemento anterior.
-
-Por defecto, una vista propia como `ProfileView()` se muestra como un unico
-nodo opaco, porque `#LayerPreview` solo ve el codigo escrito dentro de su
-propia closure y no el de otras declaraciones. Para que tambien se represente
-el contenido de su `body`, anota el tipo con `@LayerPreviewInspectable`:
+`#LayerPreview` solo ve el código de su propia closure, así que una vista propia
+como `ProfileView()` aparece como una única capa. Para que también se dibuje el
+interior de su `body`, anota el tipo:
 
 ```swift
 @LayerPreviewInspectable
@@ -94,20 +78,87 @@ struct ProfileView: View {
         .padding(24)
     }
 }
-
-#Preview("Profile") {
-    #LayerPreview {
-        ProfileView()
-    }
-}
 ```
 
-`@LayerPreviewInspectable` instrumenta el `body` de ese tipo con la misma
-logica que `#LayerPreview` y genera la conformidad necesaria para que el nodo
-`ProfileView` en el Canvas muestre, dentro de su propio recuadro, el `VStack`,
-`Image` y `Text` que declara. Los tipos que no se anoten siguen mostrandose
-como un unico nodo con su nombre.
+La macro añade una copia instrumentada del `body`, con el mismo nivel de acceso
+que el tipo. Cuando una vista y la raíz de su `body` ocupan el mismo marco,
+comparten etiqueta: `ProfileView › VStack`.
 
-La macro se expande a `LayerPreviewSurface`. No se utilizan prompts, IA ni se
-escriben archivos: el inspector existe solo en el Canvas y es compatible con
-macOS, iOS, iPadOS y watchOS.
+## Qué se instrumenta
+
+- Cualquier inicializador con nombre en mayúscula (`VStack`, `ScrollView`,
+  `NavigationStack`, `CustomCard`…) se recorre por dentro, incluidas sus
+  closures `label:`, `header:`, `footer:`, etc.
+- Se entra en las ramas de `if`, `switch` y `#if`.
+- `ForEach` y `Group` sin modificadores son transparentes: sus hijos cuentan
+  como hermanos del stack que los contiene.
+- No se tocan las closures que son acciones o que no contienen vistas:
+  `Button("Guardar") { guardar() }`, `TextField`, `Canvas`, `Chart`, `Map` y
+  `Table`. `Button(action:) { … }` y `Button { … } label: { … }` sí instrumentan
+  su etiqueta.
+- Los literales que Xcode reescribe en el Canvas (`__designTimeInteger(…)`)
+  se muestran con su valor.
+
+## Cómo funciona
+
+1. **Macro** (`Sources/LayerPreviewMacros`): envuelve cada vista en
+   `_LayerPreviewNode` e inserta *probes* antes y después de cada `.padding(...)`
+   y tras cada modificador con `cornerRadius`.
+2. **Medición** (`Sources/LayerPreview/Measurement`): cada nodo y cada probe
+   registra su marco global con `onGeometryChange` en un `LayerPreviewRegistry`.
+   Funciona también dentro de `NavigationStack` y `ScrollView`. Los nodos solo
+   escriben en el registro; únicamente el canvas lo observa.
+3. **Dibujo** (`Sources/LayerPreview/Rendering`): `AnnotationLayout` convierte
+   las medidas en regiones, cotas y etiquetas (lógica pura y testeada), y
+   `AnnotationCanvas` lo dibuja todo en un único `Canvas`.
+
+Los tipos con prefijo `_` son públicos solo porque los usa el código que genera
+la macro; están ocultos en la documentación.
+
+## Estructura del proyecto
+
+```
+Sources/
+  LayerPreview/            Macros, anotaciones y protocolo públicos
+    Support/               API para el código expandido (_LayerPreviewNode, …)
+    Measurement/           Registro, marcos medidos y área segura
+    Rendering/             Layout de anotaciones, colocación de etiquetas, tema y canvas
+  LayerPreviewMacros/      Plugin de compilador
+    Tagging/               Recorrido del árbol de vistas, cadenas de modificadores y argumentos
+Tests/
+  LayerPreviewMacrosTests/ Expansiones de la macro (Swift Testing)
+  LayerPreviewTests/       Layout, formato, colocación y registro
+Examples/LayerPreviewDemo/ App de ejemplo para iOS y macOS (Shared/, iOS/, macOS/)
+```
+
+## Desarrollo
+
+```sh
+swift test
+```
+
+Si `xcode-select` apunta a las Command Line Tools, SwiftPM no encuentra las
+macros de SwiftUI del SDK (`@State`, `@Entry`). En ese caso, usa el toolchain
+de Xcode:
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test
+```
+
+La demo (`Examples/LayerPreviewDemo/LayerPreviewDemo.xcodeproj`) incluye un
+`#Preview` por anotación. La app de iOS también muestra la capa anotada en
+tiempo de ejecución con un argumento de lanzamiento (`defaults`, `safeArea` o
+`details`):
+
+```sh
+xcrun simctl launch booted com.layerpreview.demo.ios -LayerPreviewOverlay safeArea
+```
+
+## Limitaciones
+
+- `.corners` lee el radio de los modificadores. No lo lee de una forma raíz
+  como `RoundedRectangle(cornerRadius:)` usada directamente como vista.
+- Una vista propia con modificadores (`ProfileView().padding()`) se dibuja
+  como una sola capa, aunque esté anotada con `@LayerPreviewInspectable`.
+- Las regiones reservadas de `.safeArea` necesitan compilar con el SDK de
+  iOS 27.1 y ejecutar en iOS 27.1 o posterior.

@@ -21,6 +21,10 @@ struct LayerPreviewTheme {
     }
 
     func fill(_ role: AnnotationRole) -> Color {
+        // The pale 200 fills turn gray over dark UI; the 700 lines keep their hue.
+        if colorScheme == .dark, role != .size {
+            return line(role).opacity(Self.fillOpacity)
+        }
         let base = switch role {
         case .layers: Color(hex: 0xBEDBFF)
         case .padding: Color(hex: 0xFFD6A7)

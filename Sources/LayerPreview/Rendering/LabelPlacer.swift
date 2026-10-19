@@ -10,16 +10,45 @@ struct LabelPlacer {
         self.bounds = bounds
     }
 
-    /// Returns the frame for a badge of `size` centered on one of `centers`,
-    /// and the index of the chosen center. When no candidate is free, the
-    /// first one is used, moved inside the bounds.
-    mutating func place(_ size: CGSize, around centers: [CGPoint]) -> (frame: CGRect, index: Int) {
-        let frames = centers.map { center in
-            CGRect(x: center.x - size.width / 2, y: center.y - size.height / 2, width: size.width, height: size.height)
+    /// The frame for a badge of `size` centered on the first free candidate,
+    /// and the candidate's index, or `nil` when every candidate is taken.
+    mutating func placeIfFree(_ size: CGSize, around centers: [CGPoint]) -> (frame: CGRect, index: Int)? {
+        for (index, center) in centers.enumerated() {
+            let frame = Self.frame(of: size, centeredAt: center)
+            if isFree(frame) {
+                occupied.append(frame)
+                return (frame, index)
+            }
         }
-        let placement = frames.firstIndex(where: isFree).map { (frames[$0], $0) } ?? (clamped(frames[0]), 0)
-        occupied.append(placement.0)
-        return placement
+        return nil
+    }
+
+    /// Like `placeIfFree`, but always places the badge: when no candidate is
+    /// free it searches outward from the first one a badge at a time, and as
+    /// a last resort moves the first candidate inside the bounds.
+    mutating func place(_ size: CGSize, around centers: [CGPoint]) -> (frame: CGRect, index: Int) {
+        if let placement = placeIfFree(size, around: centers) {
+            return placement
+        }
+        let origin = centers[0]
+        for step in 1...6 {
+            let dx = CGFloat(step) * (size.width / 2 + 2)
+            let dy = CGFloat(step) * (size.height + 2)
+            for (x, y) in [(0, -dy), (0, dy), (-dx, 0), (dx, 0)] {
+                let frame = Self.frame(of: size, centeredAt: CGPoint(x: origin.x + x, y: origin.y + y))
+                if isFree(frame) {
+                    occupied.append(frame)
+                    return (frame, 0)
+                }
+            }
+        }
+        let frame = clamped(Self.frame(of: size, centeredAt: origin))
+        occupied.append(frame)
+        return (frame, 0)
+    }
+
+    private static func frame(of size: CGSize, centeredAt center: CGPoint) -> CGRect {
+        CGRect(x: center.x - size.width / 2, y: center.y - size.height / 2, width: size.width, height: size.height)
     }
 
     private func isFree(_ frame: CGRect) -> Bool {

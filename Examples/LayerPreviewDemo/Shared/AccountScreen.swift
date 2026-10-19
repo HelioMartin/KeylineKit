@@ -1,17 +1,8 @@
 import LayerPreview
 import SwiftUI
 
-@main
-struct LayerPreviewDemoIOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            IOSDemoView()
-        }
-    }
-}
-
 @LayerPreviewInspectable
-private struct IOSDemoView: View {
+struct AccountScreen: View {
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -24,6 +15,7 @@ private struct IOSDemoView: View {
                         Label("Product designer", systemImage: "briefcase.fill")
                     }
                     .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.background, in: RoundedRectangle(cornerRadius: 24))
 
                     Text("Actions")
@@ -40,17 +32,24 @@ private struct IOSDemoView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
+            .background(Color.gray.opacity(0.12))
             .navigationTitle("LayerPreview")
         }
     }
 }
 
-#Preview("iOS view") {
-    IOSDemoView()
+#Preview("Plain") {
+    AccountScreen()
 }
 
-#Preview("iOS layers") {
+#Preview("Default annotations") {
     #LayerPreview {
-        IOSDemoView()
+        AccountScreen()
+    }
+}
+
+#Preview("Safe area") {
+    #LayerPreview(.safeArea, .layers) {
+        AccountScreen()
     }
 }

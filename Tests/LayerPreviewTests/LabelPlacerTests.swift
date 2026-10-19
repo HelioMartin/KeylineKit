@@ -22,6 +22,21 @@ struct LabelPlacerTests {
         #expect(placement.index == 1)
     }
 
+    @Test func searchesAroundFirstCandidateWhenAllAreTaken() {
+        var placer = LabelPlacer(bounds: CGRect(x: 0, y: 0, width: 100, height: 100))
+        _ = placer.place(size, around: [CGPoint(x: 50, y: 50)])
+        let placement = placer.place(size, around: [CGPoint(x: 50, y: 50)])
+
+        #expect(placement.frame == CGRect(x: 40, y: 33, width: 20, height: 10))
+    }
+
+    @Test func leavesOptionalBadgeOutWhenAllCandidatesAreTaken() {
+        var placer = LabelPlacer(bounds: CGRect(x: 0, y: 0, width: 100, height: 100))
+        _ = placer.place(size, around: [CGPoint(x: 50, y: 50)])
+
+        #expect(placer.placeIfFree(size, around: [CGPoint(x: 50, y: 50)]) == nil)
+    }
+
     @Test func clampsFirstCandidateWhenNoneIsFree() {
         var placer = LabelPlacer(bounds: CGRect(x: 0, y: 0, width: 100, height: 100))
         let placement = placer.place(size, around: [CGPoint(x: 98, y: -2)])

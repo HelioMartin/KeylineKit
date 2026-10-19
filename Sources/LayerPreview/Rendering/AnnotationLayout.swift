@@ -18,10 +18,11 @@ struct AnnotationLayout {
 
     func scene(for records: some Collection<NodeRecord>, safeArea: SafeAreaSnapshot?) -> AnnotationScene {
         var builder = SceneBuilder(layout: self, tree: NodeTree(records))
-        // Badges placed first win contested space, so geometry-bound values
-        // go before the more movable layer names.
-        if annotations.contains(.safeArea), let safeArea { builder.addSafeArea(safeArea) }
+        // Outlines go first so the other strokes draw over them. Badges
+        // placed first win contested space, so geometry-bound values go
+        // before the more movable layer names.
         if showsOutlines { builder.addOutlines() }
+        if annotations.contains(.safeArea), let safeArea { builder.addSafeArea(safeArea) }
         if annotations.contains(.padding) { builder.addPadding() }
         if annotations.contains(.spacing) { builder.addSpacing() }
         if annotations.contains(.corners) { builder.addCorners() }
@@ -117,17 +118,26 @@ private struct SceneBuilder {
             let shape = Path(roundedRect: occlusion, cornerRadius: min(occlusion.width, occlusion.height) / 2)
             scene.regions.append(.init(path: shape, role: .reserved))
             scene.strokes.append(.init(path: shape, role: .reserved))
-            addBadge("OCCLUSION \(MetricFormat.size(occlusion.size))", role: .reserved, around: [
-                CGPoint(x: occlusion.midX, y: occlusion.maxY + AnnotationLayout.badgeHeight / 2 + 4),
-                CGPoint(x: occlusion.midX, y: occlusion.minY - AnnotationLayout.badgeHeight / 2 - 4),
-            ])
+
+            // System UI draws over the insets, so the badge is kept inside the safe area.
+            let text = "OCCLUSION \(MetricFormat.size(occlusion.size))"
+            let size = badgeSize(text)
+            let inside = safe.insetBy(dx: size.width / 2 + 4, dy: size.height / 2 + 4)
+            let gap: CGFloat = 4
+            addBadge(text, role: .reserved, around: [
+                CGPoint(x: occlusion.midX, y: occlusion.maxY + size.height / 2 + gap),
+                CGPoint(x: occlusion.minX - size.width / 2 - gap, y: occlusion.midY),
+                CGPoint(x: occlusion.maxX + size.width / 2 + gap, y: occlusion.midY),
+                CGPoint(x: occlusion.midX, y: occlusion.minY - size.height / 2 - gap),
+            ].map { $0.clamped(to: inside) })
         }
 
         let insetFractions: [CGFloat] = [0.82, 0.18, 0.5]
         if insets.top >= 0.5 {
+            // The status bar draws over the app, so the badge sits just below the inset.
             addDimension("TOP \(MetricFormat.points(insets.top))", role: .padding, axis: .vertical,
                          span: screen.minY...safe.minY,
-                         candidates: insetFractions.map { (screen.minX + screen.width * $0, (screen.minY + safe.minY) / 2) })
+                         candidates: insetFractions.map { (screen.minX + screen.width * $0, safe.minY + AnnotationLayout.badgeHeight / 2 + 3) })
         }
         if insets.bottom >= 0.5 {
             addDimension("BOTTOM \(MetricFormat.points(insets.bottom))", role: .padding, axis: .vertical,
@@ -238,41 +248,51 @@ private struct SceneBuilder {
 
     /// Width and height dimension lines just outside the frame (inside when
     /// there is no room), joined to its corners by dashed extension lines.
+    /// Sizes are secondary: a dimension whose badge finds no free spot is
+    /// left out rather than drawn over other values.
     private mutating func addSize(of frame: CGRect) {
         let offset = AnnotationLayout.dimensionOffset
         let bounds = layout.bounds
         let fractions = AnnotationLayout.candidateFractions
 
         let y = frame.minY - offset - AnnotationLayout.badgeHeight / 2 >= bounds.minY ? frame.minY - offset : frame.minY + offset
-        addExtensions([CGPoint(x: frame.minX, y: frame.minY), CGPoint(x: frame.maxX, y: frame.minY)], to: { CGPoint(x: $0.x, y: y) })
-        addDimension(MetricFormat.points(frame.width), role: .size, axis: .horizontal,
-                     span: frame.minX...frame.maxX,
-                     candidates: fractions.map { (y, frame.minX + frame.width * $0) })
+        if addDimension(MetricFormat.points(frame.width), role: .size, axis: .horizontal,
+                        span: frame.minX...frame.maxX,
+                        candidates: fractions.map { (y, frame.minX + frame.width * $0) },
+                        isOptional: true) {
+            addExtensions([CGPoint(x: frame.minX, y: frame.minY), CGPoint(x: frame.maxX, y: frame.minY)], to: { CGPoint(x: $0.x, y: y) })
+        }
 
         let x = frame.minX - offset - AnnotationLayout.badgeHeight / 2 >= bounds.minX ? frame.minX - offset : frame.minX + offset
-        addExtensions([CGPoint(x: frame.minX, y: frame.minY), CGPoint(x: frame.minX, y: frame.maxY)], to: { CGPoint(x: x, y: $0.y) })
-        addDimension(MetricFormat.points(frame.height), role: .size, axis: .vertical,
-                     span: frame.minY...frame.maxY,
-                     candidates: fractions.map { (x, frame.minY + frame.height * $0) },
-                     isRotated: true)
+        if addDimension(MetricFormat.points(frame.height), role: .size, axis: .vertical,
+                        span: frame.minY...frame.maxY,
+                        candidates: fractions.map { (x, frame.minY + frame.height * $0) },
+                        isRotated: true,
+                        isOptional: true) {
+            addExtensions([CGPoint(x: frame.minX, y: frame.minY), CGPoint(x: frame.minX, y: frame.maxY)], to: { CGPoint(x: x, y: $0.y) })
+        }
     }
 
     // MARK: Primitives
 
     /// A dimension line along `axis` across `span`, with ticks at both ends
     /// and a centered badge. Each candidate is `(cross, along)`: where the
-    /// line sits across the axis and where the badge sits along it.
+    /// line sits across the axis and where the badge sits along it. An
+    /// optional dimension is skipped when no candidate is free.
+    @discardableResult
     private mutating func addDimension(
         _ text: String,
         role: AnnotationRole,
         axis: _LayerPreviewDeclaration.Axis,
         span: ClosedRange<CGFloat>,
         candidates: [(cross: CGFloat, along: CGFloat)],
-        isRotated: Bool = false
-    ) {
+        isRotated: Bool = false,
+        isOptional: Bool = false
+    ) -> Bool {
         let size = badgeSize(text, isRotated: isRotated)
         let centers = candidates.map { axis == .vertical ? CGPoint(x: $0.cross, y: $0.along) : CGPoint(x: $0.along, y: $0.cross) }
-        let (frame, index) = placer.place(size, around: centers)
+        let placement = isOptional ? placer.placeIfFree(size, around: centers) : placer.place(size, around: centers)
+        guard let (frame, index) = placement else { return false }
         let cross = candidates[index].cross
         let half = AnnotationLayout.tickLength / 2
 
@@ -295,6 +315,7 @@ private struct SceneBuilder {
             }
         }, role: role))
         scene.badges.append(.init(text: text, frame: frame, role: role, isRotated: isRotated))
+        return true
     }
 
     private mutating func addExtensions(_ points: [CGPoint], to target: (CGPoint) -> CGPoint) {
@@ -316,5 +337,12 @@ private struct SceneBuilder {
         let width = textSize.width.rounded(.up) + 2 * AnnotationLayout.badgeInset
         let height = max(AnnotationLayout.badgeHeight, textSize.height.rounded(.up) + 2)
         return isRotated ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
+    }
+}
+
+private extension CGPoint {
+    func clamped(to rect: CGRect) -> CGPoint {
+        guard !rect.isNull, rect.width >= 0, rect.height >= 0 else { return self }
+        return CGPoint(x: min(max(x, rect.minX), rect.maxX), y: min(max(y, rect.minY), rect.maxY))
     }
 }

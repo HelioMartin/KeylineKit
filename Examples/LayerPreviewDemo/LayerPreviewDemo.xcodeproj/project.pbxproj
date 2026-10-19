@@ -1,23 +1,38 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {};
+	classes = {
+	};
 	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10000000000000000000001 /* LayerPreviewDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* LayerPreviewDemoApp.swift */; };
 		A10000000000000000000003 /* LayerPreview in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000004 /* LayerPreview */; };
-		A10000000000000000000019 /* LayerPreviewDemoIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001A /* LayerPreviewDemoIOSApp.swift */; };
-		A1000000000000000000001B /* LayerPreview in Frameworks (iOS) */ = {isa = PBXBuildFile; productRef = A1000000000000000000001C /* LayerPreview (iOS) */; };
+		A1000000000000000000001B /* LayerPreview in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000001C /* LayerPreview */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A10000000000000000000002 /* LayerPreviewDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerPreviewDemoApp.swift; sourceTree = "<group>"; };
 		A10000000000000000000005 /* LayerPreviewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LayerPreviewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1000000000000000000001A /* LayerPreviewDemoIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerPreviewDemoIOSApp.swift; sourceTree = "<group>"; };
 		A1000000000000000000001D /* LayerPreviewDemoIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LayerPreviewDemoIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A10000000000000000000030 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000031 /* iOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000032 /* macOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = macOS;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A10000000000000000000006 /* Frameworks */ = {
@@ -28,11 +43,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A1000000000000000000001E /* Frameworks (iOS) */ = {
+		A1000000000000000000001E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1000000000000000000001B /* LayerPreview in Frameworks (iOS) */,
+				A1000000000000000000001B /* LayerPreview in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,8 +57,9 @@
 		A10000000000000000000007 = {
 			isa = PBXGroup;
 			children = (
-				A10000000000000000000002 /* LayerPreviewDemoApp.swift */,
-				A1000000000000000000001A /* LayerPreviewDemoIOSApp.swift */,
+				A10000000000000000000030 /* Shared */,
+				A10000000000000000000031 /* iOS */,
+				A10000000000000000000032 /* macOS */,
 				A10000000000000000000008 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,23 +73,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1000000000000000000001F /* LayerPreviewDemoIOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A10000000000000000000024 /* Build configuration list for PBXNativeTarget "LayerPreviewDemoIOS" */;
-			buildPhases = (
-				A10000000000000000000020 /* Sources (iOS) */,
-				A1000000000000000000001E /* Frameworks (iOS) */,
-			);
-			buildRules = ();
-			dependencies = ();
-			name = LayerPreviewDemoIOS;
-			packageProductDependencies = (
-				A1000000000000000000001C /* LayerPreview (iOS) */,
-			);
-			productName = LayerPreviewDemoIOS;
-			productReference = A1000000000000000000001D /* LayerPreviewDemoIOS.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -84,14 +83,43 @@
 				A10000000000000000000011 /* Sources */,
 				A10000000000000000000006 /* Frameworks */,
 			);
-			buildRules = ();
-			dependencies = ();
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000030 /* Shared */,
+				A10000000000000000000032 /* macOS */,
+			);
 			name = LayerPreviewDemo;
 			packageProductDependencies = (
 				A10000000000000000000004 /* LayerPreview */,
 			);
 			productName = LayerPreviewDemo;
 			productReference = A10000000000000000000005 /* LayerPreviewDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A1000000000000000000001F /* LayerPreviewDemoIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000024 /* Build configuration list for PBXNativeTarget "LayerPreviewDemoIOS" */;
+			buildPhases = (
+				A10000000000000000000020 /* Sources */,
+				A1000000000000000000001E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000030 /* Shared */,
+				A10000000000000000000031 /* iOS */,
+			);
+			name = LayerPreviewDemoIOS;
+			packageProductDependencies = (
+				A1000000000000000000001C /* LayerPreview */,
+			);
+			productName = LayerPreviewDemoIOS;
+			productReference = A1000000000000000000001D /* LayerPreviewDemoIOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -101,8 +129,8 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2660;
-				LastUpgradeCheck = 2660;
+				LastSwiftUpdateCheck = 2710;
+				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					A10000000000000000000009 = {
 						CreatedOnToolsVersion = 26.6;
@@ -113,14 +141,16 @@
 				};
 			};
 			buildConfigurationList = A10000000000000000000013 /* Build configuration list for PBXProject "LayerPreviewDemo" */;
-			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base);
+			knownRegions = (
+				en,
+				Base,
+			);
 			mainGroup = A10000000000000000000007;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				A10000000000000000000014 /* XCLocalSwiftPackageReference ".." */,
+				A10000000000000000000014 /* XCLocalSwiftPackageReference "../.." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A10000000000000000000008 /* Products */;
@@ -133,20 +163,19 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXResourcesBuildPhase section */
-/* End PBXResourcesBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		A10000000000000000000011 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (A10000000000000000000001 /* LayerPreviewDemoApp.swift in Sources */);
+			files = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A10000000000000000000020 /* Sources (iOS) */ = {
+		A10000000000000000000020 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (A10000000000000000000019 /* LayerPreviewDemoIOSApp.swift in Sources */);
+			files = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -156,9 +185,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				SDKROOT = macosx;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -166,53 +202,41 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				SDKROOT = macosx;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
 		A10000000000000000000017 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
 				ENABLE_DEBUG_DYLIB = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.layerpreview.demo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 6.0;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
 		A10000000000000000000018 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.layerpreview.demo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 6.0;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		A10000000000000000000021 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
 				ENABLE_DEBUG_DYLIB = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.layerpreview.demo.ios;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 6.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -221,14 +245,9 @@
 		A10000000000000000000022 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.layerpreview.demo.ios;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 6.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -237,42 +256,51 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A10000000000000000000013 /* Build configuration list for PBXProject "LayerPreviewDemo" */ = {
+		A10000000000000000000010 /* Build configuration list for PBXNativeTarget "LayerPreviewDemo" */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (A10000000000000000000015 /* Debug */, A10000000000000000000016 /* Release */);
+			buildConfigurations = (
+				A10000000000000000000017 /* Debug */,
+				A10000000000000000000018 /* Release */,
+			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A10000000000000000000010 /* Build configuration list for PBXNativeTarget "LayerPreviewDemo" */ = {
+		A10000000000000000000013 /* Build configuration list for PBXProject "LayerPreviewDemo" */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (A10000000000000000000017 /* Debug */, A10000000000000000000018 /* Release */);
+			buildConfigurations = (
+				A10000000000000000000015 /* Debug */,
+				A10000000000000000000016 /* Release */,
+			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		A10000000000000000000024 /* Build configuration list for PBXNativeTarget "LayerPreviewDemoIOS" */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (A10000000000000000000021 /* Debug */, A10000000000000000000022 /* Release */);
+			buildConfigurations = (
+				A10000000000000000000021 /* Debug */,
+				A10000000000000000000022 /* Release */,
+			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		A10000000000000000000014 /* XCLocalSwiftPackageReference ".." */ = {
+		A10000000000000000000014 /* XCLocalSwiftPackageReference "../.." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
+			relativePath = ../..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		A10000000000000000000004 /* LayerPreview */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A10000000000000000000014 /* XCLocalSwiftPackageReference ".." */;
+			package = A10000000000000000000014 /* XCLocalSwiftPackageReference "../.." */;
 			productName = LayerPreview;
 		};
-		A1000000000000000000001C /* LayerPreview (iOS) */ = {
+		A1000000000000000000001C /* LayerPreview */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A10000000000000000000014 /* XCLocalSwiftPackageReference ".." */;
+			package = A10000000000000000000014 /* XCLocalSwiftPackageReference "../.." */;
 			productName = LayerPreview;
 		};
 /* End XCSwiftPackageProductDependency section */
