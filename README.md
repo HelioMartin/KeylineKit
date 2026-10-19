@@ -24,7 +24,7 @@ between its siblings, **measured in points** from the rendered layout. It
 can also show sizes, corner radii and the device safe area.
 
 <p align="center">
-  <a href="https://heliomartin.github.io/KeylineKit/"><picture>
+  <a href="https://keylinekit.heliomartin.com"><picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/keylinekit-website-dark.png">
     <img src=".github/assets/keylinekit-website-light.png" width="123" alt="KeylineKit website">
   </picture></a>
