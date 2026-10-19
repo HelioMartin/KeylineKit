@@ -4,10 +4,10 @@ import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
-    name: "LayerPreview",
+    name: "KeylineKit",
     platforms: [.macOS(.v13), .iOS(.v16), .watchOS(.v9)],
     products: [
-        .library(name: "LayerPreview", targets: ["LayerPreview"]),
+        .library(name: "KeylineKit", targets: ["KeylineKit"]),
     ],
     dependencies: [
         // A range across swift-syntax majors keeps the package resolvable next
@@ -17,7 +17,7 @@ let package = Package(
     targets: [
         // Compiler plugin that rewrites the view tree at compile time.
         .macro(
-            name: "LayerPreviewMacros",
+            name: "KeylineKitMacros",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
@@ -29,20 +29,20 @@ let package = Package(
 
         // Public macro declarations plus the SwiftUI runtime that measures
         // and draws the annotations.
-        .target(name: "LayerPreview", dependencies: ["LayerPreviewMacros"]),
+        .target(name: "KeylineKit", dependencies: ["KeylineKitMacros"]),
 
         .testTarget(
-            name: "LayerPreviewMacrosTests",
+            name: "KeylineKitMacrosTests",
             dependencies: [
-                "LayerPreviewMacros",
+                "KeylineKitMacros",
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
             ]
         ),
         .testTarget(
-            name: "LayerPreviewTests",
-            dependencies: ["LayerPreview"]
+            name: "KeylineKitTests",
+            dependencies: ["KeylineKit"]
         ),
     ],
     swiftLanguageModes: [.v6]

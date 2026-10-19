@@ -1,6 +1,6 @@
-# LayerPreview
+# KeylineKit
 
-`#LayerPreview` dibuja sobre una vista SwiftUI cómo está construido su layout:
+`#Keyline` dibuja sobre una vista SwiftUI cómo está construido su layout:
 el nombre y los límites de cada capa, el padding y el spacing **medidos** en
 puntos, los tamaños, los radios de esquina y el área segura del dispositivo.
 El lenguaje visual está inspirado en [safearea.info](https://safearea.info):
@@ -8,11 +8,11 @@ regiones rellenas, cotas con marcas en los extremos y valores en etiquetas
 monoespaciadas.
 
 ```swift
-import LayerPreview
+import KeylineKit
 import SwiftUI
 
 #Preview("Profile layers") {
-    #LayerPreview {
+    #Keyline {
         VStack(spacing: 16) {
             ProfileView()
         }
@@ -30,9 +30,9 @@ Sin argumentos se dibujan `.layers`, `.padding` y `.spacing`. Para elegir otras,
 pásalas como argumentos:
 
 ```swift
-#LayerPreview(.padding, .corners) { ProfileView() }
-#LayerPreview(.safeArea, .layers) { AccountScreen() }
-#LayerPreview(.layers, showContainerLines: false) { ProfileView() }
+#Keyline(.padding, .corners) { ProfileView() }
+#Keyline(.safeArea, .layers) { AccountScreen() }
+#Keyline(.layers, showContainerLines: false) { ProfileView() }
 ```
 
 | Anotación | Qué dibuja | Color |
@@ -61,14 +61,14 @@ lado:
 Las etiquetas se colocan juntas en una sola capa y nunca se solapan. Si un valor
 secundario (las cotas de `.size`) no cabe, se omite en vez de tapar a otro.
 
-## Vistas propias: `@LayerPreviewInspectable`
+## Vistas propias: `@Keylined`
 
-`#LayerPreview` solo ve el código de su propia closure, así que una vista propia
+`#Keyline` solo ve el código de su propia closure, así que una vista propia
 como `ProfileView()` aparece como una única capa. Para que también se dibuje el
 interior de su `body`, anota el tipo:
 
 ```swift
-@LayerPreviewInspectable
+@Keylined
 struct ProfileView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -101,14 +101,14 @@ comparten etiqueta: `ProfileView › VStack`.
 
 ## Cómo funciona
 
-1. **Macro** (`Sources/LayerPreviewMacros`): envuelve cada vista en
-   `_LayerPreviewNode` e inserta *probes* antes y después de cada `.padding(...)`
+1. **Macro** (`Sources/KeylineKitMacros`): envuelve cada vista en
+   `_KeylineNode` e inserta *probes* antes y después de cada `.padding(...)`
    y tras cada modificador con `cornerRadius`.
-2. **Medición** (`Sources/LayerPreview/Measurement`): cada nodo y cada probe
-   registra su marco global con `onGeometryChange` en un `LayerPreviewRegistry`.
+2. **Medición** (`Sources/KeylineKit/Measurement`): cada nodo y cada probe
+   registra su marco global con `onGeometryChange` en un `KeylineRegistry`.
    Funciona también dentro de `NavigationStack` y `ScrollView`. Los nodos solo
    escriben en el registro; únicamente el canvas lo observa.
-3. **Dibujo** (`Sources/LayerPreview/Rendering`): `AnnotationLayout` convierte
+3. **Dibujo** (`Sources/KeylineKit/Rendering`): `AnnotationLayout` convierte
    las medidas en regiones, cotas y etiquetas (lógica pura y testeada), y
    `AnnotationCanvas` lo dibuja todo en un único `Canvas`.
 
@@ -119,16 +119,16 @@ la macro; están ocultos en la documentación.
 
 ```
 Sources/
-  LayerPreview/            Macros, anotaciones y protocolo públicos
-    Support/               API para el código expandido (_LayerPreviewNode, …)
+  KeylineKit/              Macros, anotaciones y protocolo públicos
+    Support/               API para el código expandido (_KeylineNode, …)
     Measurement/           Registro, marcos medidos y área segura
     Rendering/             Layout de anotaciones, colocación de etiquetas, tema y canvas
-  LayerPreviewMacros/      Plugin de compilador
+  KeylineKitMacros/        Plugin de compilador
     Tagging/               Recorrido del árbol de vistas, cadenas de modificadores y argumentos
 Tests/
-  LayerPreviewMacrosTests/ Expansiones de la macro (Swift Testing)
-  LayerPreviewTests/       Layout, formato, colocación y registro
-Examples/LayerPreviewDemo/ App de ejemplo para iOS y macOS (Shared/, iOS/, macOS/)
+  KeylineKitMacrosTests/   Expansiones de la macro (Swift Testing)
+  KeylineKitTests/         Layout, formato, colocación y registro
+Examples/KeylineDemo/      App de ejemplo para iOS y macOS (Shared/, iOS/, macOS/)
 ```
 
 ## Desarrollo
@@ -145,13 +145,13 @@ de Xcode:
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test
 ```
 
-La demo (`Examples/LayerPreviewDemo/LayerPreviewDemo.xcodeproj`) incluye un
+La demo (`Examples/KeylineDemo/KeylineDemo.xcodeproj`) incluye un
 `#Preview` por anotación. La app de iOS también muestra la capa anotada en
 tiempo de ejecución con un argumento de lanzamiento (`defaults`, `safeArea` o
 `details`):
 
 ```sh
-xcrun simctl launch booted com.layerpreview.demo.ios -LayerPreviewOverlay safeArea
+xcrun simctl launch booted com.keylinekit.demo.ios -KeylineOverlay safeArea
 ```
 
 ## Limitaciones
@@ -159,6 +159,6 @@ xcrun simctl launch booted com.layerpreview.demo.ios -LayerPreviewOverlay safeAr
 - `.corners` lee el radio de los modificadores. No lo lee de una forma raíz
   como `RoundedRectangle(cornerRadius:)` usada directamente como vista.
 - Una vista propia con modificadores (`ProfileView().padding()`) se dibuja
-  como una sola capa, aunque esté anotada con `@LayerPreviewInspectable`.
+  como una sola capa, aunque esté anotada con `@Keylined`.
 - Las regiones reservadas de `.safeArea` necesitan compilar con el SDK de
   iOS 27.1 y ejecutar en iOS 27.1 o posterior.
