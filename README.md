@@ -4,13 +4,6 @@
 </picture>
 
 <p align="center">
-  <a href="https://heliomartin.github.io/KeylineKit/"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/keylinekit-website-dark.png">
-    <img src=".github/assets/keylinekit-website-light.png" width="123" alt="KeylineKit website">
-  </picture></a>
-</p>
-
-<p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/Apple-iOS_16%2B_%7C_macOS_13%2B_%7C_watchOS_9%2B-222222?logo=apple" alt="iOS 16+, macOS 13+ and watchOS 9+"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/Swift_Package_Manager-compatible-4BC51D" alt="Swift Package Manager compatible"></a>
@@ -31,7 +24,13 @@ between its siblings, **measured in points** from the rendered layout. It
 can also show sizes, corner radii and the device safe area.
 
 <p align="center">
-  <a href="https://heliomartin.github.io/KeylineKit/">🌐 Website</a> ·
+  <a href="https://heliomartin.github.io/KeylineKit/"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/keylinekit-website-dark.png">
+    <img src=".github/assets/keylinekit-website-light.png" width="123" alt="KeylineKit website">
+  </picture></a>
+</p>
+
+<p align="center">
   <a href="#features">🌟 Features</a> ·
   <a href="#why-keylinekit">🤔 Why KeylineKit?</a> ·
   <a href="#installation">📲 Installation</a> ·
