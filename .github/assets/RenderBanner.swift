@@ -156,6 +156,7 @@ try MainActor.assumeIsolated {
     try render(Banner(palette: .dark), to: output.appendingPathComponent("keylinekit-banner-dark.png"))
     try render(WebsiteButton(palette: .light), to: output.appendingPathComponent("keylinekit-website-light.png"))
     try render(WebsiteButton(palette: .dark), to: output.appendingPathComponent("keylinekit-website-dark.png"))
-    // Safari ignores SVG favicons, so the website also links this 64 px PNG of the mark.
+    // Safari ignores SVG favicons, so the website also links 64 px PNGs of the mark, one per appearance.
     try render(Mark(palette: .light), to: website.appendingPathComponent("favicon.png"), scale: 64 / 112)
+    try render(Mark(palette: .dark), to: website.appendingPathComponent("favicon-dark.png"), scale: 64 / 112)
 }
