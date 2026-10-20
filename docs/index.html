@@ -329,6 +329,9 @@ code, pre { font-family: var(--font-mono); }
 .copy { font: 600 0.9rem/1 var(--font-body); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--surface); color: var(--ink); cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .chips li { font: 600 0.82rem/1 var(--font-mono); padding: 8px 10px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.badges a { display: block; line-height: 0; }
+.badges img { display: block; height: 20px; width: auto; max-width: 100%; }
 .swatch { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; background: var(--swatch); }
 
 .footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.92rem; }
@@ -608,6 +611,10 @@ code, pre { font-family: var(--font-mono); }
           <li>macOS 13+</li>
           <li>watchOS 9+</li>
         </ul>
+        <p class="badges">
+          <a href="https://swiftpackageindex.com/HelioMartin/KeylineKit"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FHelioMartin%2FKeylineKit%2Fbadge%3Ftype%3Dswift-versions" alt="Swift versions supported, on the Swift Package Index" height="20"></a>
+          <a href="https://swiftpackageindex.com/HelioMartin/KeylineKit"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FHelioMartin%2FKeylineKit%2Fbadge%3Ftype%3Dplatforms" alt="Platforms supported, on the Swift Package Index" height="20"></a>
+        </p>
       </div>
       <pre class="code"><code><span class="com">// Package.swift</span>
 dependencies: [

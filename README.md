@@ -4,8 +4,8 @@
 </picture>
 
 <p align="center">
-  <a href="#installation"><img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6"></a>
-  <a href="#installation"><img src="https://img.shields.io/badge/Apple-iOS_16%2B_%7C_macOS_13%2B_%7C_watchOS_9%2B-222222?logo=apple" alt="iOS 16+, macOS 13+ and watchOS 9+"></a>
+  <a href="https://swiftpackageindex.com/HelioMartin/KeylineKit"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FHelioMartin%2FKeylineKit%2Fbadge%3Ftype%3Dswift-versions" alt="Swift versions supported, on the Swift Package Index"></a>
+  <a href="https://swiftpackageindex.com/HelioMartin/KeylineKit"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FHelioMartin%2FKeylineKit%2Fbadge%3Ftype%3Dplatforms" alt="Platforms supported, on the Swift Package Index"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/Swift_Package_Manager-compatible-4BC51D" alt="Swift Package Manager compatible"></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT license"></a>
 </p>
