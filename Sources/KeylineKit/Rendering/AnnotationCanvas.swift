@@ -7,11 +7,12 @@ struct AnnotationCanvas: View {
     let annotations: Set<KeylineAnnotation>
     let showsOutlines: Bool
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.keylineColors) private var colors
 
     var body: some View {
         let records = Array(registry.nodes.values)
         let safeArea = registry.safeArea
-        let theme = KeylineTheme(colorScheme: colorScheme)
+        let theme = KeylineTheme(colorScheme: colorScheme, colors: colors)
         let annotations = annotations
         let showsOutlines = showsOutlines
 

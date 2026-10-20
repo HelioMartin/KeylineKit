@@ -2,15 +2,21 @@ import SwiftUI
 
 /// The annotation palette (Tailwind 700 lines, 200 fills): blue for
 /// layers, orange for insets, green for content, purple for spacing and
-/// reserved regions, pink for corners and slate for sizes.
+/// reserved regions, pink for corners and slate for sizes. Each color set
+/// in `colors` replaces its role's.
 struct KeylineTheme {
     var colorScheme: ColorScheme
+    var colors = KeylineColors()
 
     /// Fills stay translucent so the UI underneath remains readable.
     private static let fillOpacity = 0.45
+    /// A custom color has no pale tint, so its light fill is fainter: a 700
+    /// line at this opacity is about as pale over white as a 200 fill.
+    private static let customLightFillOpacity = 0.2
 
     func line(_ role: AnnotationRole) -> Color {
-        switch role {
+        if let custom = colors[role] { return custom }
+        return switch role {
         case .layers: Color(hex: 0x1447E6)
         case .padding: Color(hex: 0xCA3500)
         case .content: Color(hex: 0x008236)
@@ -21,6 +27,9 @@ struct KeylineTheme {
     }
 
     func fill(_ role: AnnotationRole) -> Color {
+        if let custom = colors[role] {
+            return custom.opacity(colorScheme == .dark ? Self.fillOpacity : Self.customLightFillOpacity)
+        }
         // The pale 200 fills turn gray over dark UI; the 700 lines keep their hue.
         if colorScheme == .dark, role != .size {
             return line(role).opacity(Self.fillOpacity)
@@ -37,7 +46,8 @@ struct KeylineTheme {
     }
 
     func labelForeground(_ role: AnnotationRole) -> Color {
-        role == .size && colorScheme == .dark ? Color(hex: 0x0F172B) : .white
+        // Only the default size badge is white in dark mode and needs dark text.
+        role == .size && colorScheme == .dark && colors.size == nil ? Color(hex: 0x0F172B) : .white
     }
 }
 

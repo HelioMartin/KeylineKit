@@ -71,7 +71,7 @@ can also show sizes, corner radii and the device safe area.
 - ⭕️ **Corner radii:** the arc and value of `cornerRadius:` and `.cornerRadius(_:)`.
 - 🧩 **Your own views too:** `@Keylined` opens a custom view's `body` to the overlay.
 - 🙈 **No label pile-ups:** all labels are laid out together, so they never cover each other.
-- 🌗 **Light and dark:** a palette tuned for both.
+- 🌗 **Light and dark:** a palette tuned for both, or your own colors with `.keylineColors(_:)`.
 - 🪶 **Preview-only:** `#Keyline` lives in your previews; your views render exactly as before everywhere else.
 
 <a name="why-keylinekit"></a>
@@ -181,6 +181,37 @@ you want instead:
 | `.none` | Nothing; outlines still follow `showContainerLines` | |
 
 Layer outlines are on by default. Turn them off with `showContainerLines: false`.
+
+### 🖍 Custom colors
+
+Pass your own colors with `.keylineColors(_:)`. Set only the ones you want
+to change; the rest keep the palette above:
+
+```swift
+#Preview {
+    #Keyline(.padding, .safeArea) {
+        AccountScreen()
+    }
+    .keylineColors(KeylineColors(padding: .red, content: .blue))
+}
+```
+
+| Color | Draws |
+| --- | --- |
+| `layers` | Layer outlines and names |
+| `padding` | Padding bands and their values, and the safe-area insets |
+| `content` | The content outline of each padding band, and the safe area |
+| `spacing` | The gap between siblings of a `VStack` or `HStack` |
+| `reserved` | Reserved regions that cover content |
+| `corners` | The arc and value of each corner radius |
+| `size` | Width and height dimension lines |
+
+A color draws lines and badges, and a translucent copy fills regions. Badge
+text stays white, so pick colors dark enough to read it. A dynamic color,
+such as one from your asset catalog, adapts to light and dark mode.
+
+Applied to any parent view, the colors reach every `#Keyline` inside it.
+Nested calls combine, and the one closest to `#Keyline` wins.
 
 <a name="custom-views"></a>
 

@@ -56,3 +56,10 @@ struct ProfileView: View {
         ProfileView()
     }
 }
+
+#Preview("Custom colors") {
+    #Keyline(.padding, .spacing) {
+        ProfileView()
+    }
+    .keylineColors(.init(padding: .indigo, spacing: .red))
+}
