@@ -319,6 +319,7 @@ code, pre { font-family: var(--font-mono); }
 .copy { font: 600 0.9rem/1 var(--font-body); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--surface); color: var(--ink); cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .chips li { font: 600 0.82rem/1 var(--font-mono); padding: 8px 10px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); }
+.swatch { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; background: var(--swatch); }
 
 .footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.92rem; }
 .footer .wrap { display: flex; flex-direction: column; gap: 6px; }
@@ -350,6 +351,7 @@ code, pre { font-family: var(--font-mono); }
     </a>
     <nav class="nav" aria-label="Sections">
       <a href="#annotations">Annotations</a>
+      <a href="#colors">Colors</a>
       <a href="#how">How it works</a>
       <a href="#install">Install</a>
       <a href="https://github.com/HelioMartin/KeylineKit">GitHub</a>
@@ -425,7 +427,7 @@ code, pre { font-family: var(--font-mono); }
     <div class="wrap">
       <div class="section-head">
         <h2>Pick what to draw</h2>
-        <p>With no arguments, <code>#Keyline</code> draws layers, padding and spacing. Pass the annotations you want, in any combination, and change their colors with <code>.keylineColors(_:)</code>.</p>
+        <p>With no arguments, <code>#Keyline</code> draws layers, padding and spacing. Pass the annotations you want, in any combination, and <a href="#colors">change their colors</a>.</p>
       </div>
       <div class="cards">
         <article class="card">
@@ -495,6 +497,34 @@ code, pre { font-family: var(--font-mono); }
           <p>Device insets, the safe area and, on iOS 27.1, the reserved regions that cover content.</p>
         </article>
       </div>
+    </div>
+  </section>
+
+  <section class="section" id="colors">
+    <div class="wrap split">
+      <div>
+        <h2>Use your own colors</h2>
+        <p>Pass <code>.keylineColors(_:)</code> to change the color of any element. Set only the ones you want; the rest keep the default palette.</p>
+        <p>A color draws lines and badges, and a translucent copy fills regions. Set it on any parent view and it reaches every <code>#Keyline</code> inside.</p>
+        <ul class="chips" aria-label="Elements you can color">
+          <li><span class="swatch" style="--swatch: var(--k-blue)"></span>layers</li>
+          <li><span class="swatch" style="--swatch: var(--k-orange)"></span>padding</li>
+          <li><span class="swatch" style="--swatch: var(--k-green)"></span>content</li>
+          <li><span class="swatch" style="--swatch: var(--k-purple)"></span>spacing</li>
+          <li><span class="swatch" style="--swatch: var(--k-purple)"></span>reserved</li>
+          <li><span class="swatch" style="--swatch: var(--k-pink)"></span>corners</li>
+          <li><span class="swatch" style="--swatch: var(--k-slate)"></span>size</li>
+        </ul>
+      </div>
+      <pre class="code"><code><span class="mac">#Preview</span> {
+    <span class="mac">#Keyline</span>(.<span class="decl">padding</span>, .<span class="decl">spacing</span>) {
+        <span class="type">ProfileView</span>()
+    }
+    .<span class="decl">keylineColors</span>(<span class="type">KeylineColors</span>(
+        padding: .<span class="decl">indigo</span>,
+        spacing: .<span class="decl">red</span>
+    ))
+}</code></pre>
     </div>
   </section>
 
