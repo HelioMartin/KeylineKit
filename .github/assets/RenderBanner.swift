@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 
-// Renders the KeylineKit README banner (light and dark) and the website button to PNG.
-// Usage: DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift .github/assets/RenderBanner.swift .github/assets
+// Renders the KeylineKit README banner (light and dark), the website button and the website favicon to PNG.
+// Usage: DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift .github/assets/RenderBanner.swift .github/assets docs
 
 struct Palette {
     let background: Color
@@ -140,9 +140,9 @@ struct WebsiteButton: View {
 }
 
 @MainActor
-func render(_ view: some View, to url: URL) throws {
+func render(_ view: some View, to url: URL, scale: CGFloat = 2) throws {
     let renderer = ImageRenderer(content: view)
-    renderer.scale = 2
+    renderer.scale = scale
     guard let image = renderer.cgImage else { throw CocoaError(.fileWriteUnknown) }
     let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
     try data?.write(to: url)
@@ -150,9 +150,12 @@ func render(_ view: some View, to url: URL) throws {
 }
 
 let output = URL(fileURLWithPath: CommandLine.arguments[1])
+let website = URL(fileURLWithPath: CommandLine.arguments[2])
 try MainActor.assumeIsolated {
     try render(Banner(palette: .light), to: output.appendingPathComponent("keylinekit-banner-light.png"))
     try render(Banner(palette: .dark), to: output.appendingPathComponent("keylinekit-banner-dark.png"))
     try render(WebsiteButton(palette: .light), to: output.appendingPathComponent("keylinekit-website-light.png"))
     try render(WebsiteButton(palette: .dark), to: output.appendingPathComponent("keylinekit-website-dark.png"))
+    // Safari ignores SVG favicons, so the website also links this 64 px PNG of the mark.
+    try render(Mark(palette: .light), to: website.appendingPathComponent("favicon.png"), scale: 64 / 112)
 }
