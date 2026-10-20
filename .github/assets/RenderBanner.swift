@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-// Renders the KeylineKit README banner (light and dark), the website button and the website favicon to PNG.
+// Renders the KeylineKit README banner (light and dark), the website button, and the website favicons and Open Graph image to PNG.
 // Usage: DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift .github/assets/RenderBanner.swift .github/assets docs
 
 struct Palette {
@@ -115,6 +115,18 @@ struct Banner: View {
     }
 }
 
+/// The website's Open Graph image: the light banner centered on the 1200 × 630
+/// card that link previews use, so cropping to 1.91:1 or 2:1 keeps it whole.
+/// It is enlarged to stay legible in small previews.
+struct SocialCard: View {
+    var body: some View {
+        Banner(palette: .light)
+            .scaleEffect(1.35)
+            .frame(width: 1200, height: 630)
+            .background(Palette.light.background)
+    }
+}
+
 /// The link to the website under the README banner: a small outlined pill
 /// in the page's own colors, one image per theme.
 struct WebsiteButton: View {
@@ -159,4 +171,5 @@ try MainActor.assumeIsolated {
     // Safari ignores SVG favicons, so the website also links 64 px PNGs of the mark, one per appearance.
     try render(Mark(palette: .light), to: website.appendingPathComponent("favicon.png"), scale: 64 / 112)
     try render(Mark(palette: .dark), to: website.appendingPathComponent("favicon-dark.png"), scale: 64 / 112)
+    try render(SocialCard(), to: website.appendingPathComponent("images/og-image.png"), scale: 1)
 }
